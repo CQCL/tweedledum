@@ -2,6 +2,8 @@
 | Part of Tweedledum Project.  This file is distributed under the MIT License.
 | See accompanying file /LICENSE for details.
 *-----------------------------------------------------------------------------*/
+#include <kitty/kitty.hpp>
+#include <mockturtle/algorithms/exorcism.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_verilog.hpp>
@@ -14,8 +16,10 @@ void init_mockturtle(pybind11::module& module)
 {
     namespace py = pybind11;
     using namespace mockturtle;
+    using namespace kitty;
     using signal = xag_network::signal;
-
+    
+    
     py::class_<signal>(module, "Signal")
         .def("__not__", [](signal const& lhs) { return !lhs; })
         .def(py::self == py::self)
@@ -60,4 +64,11 @@ void init_mockturtle(pybind11::module& module)
     module.def("write_verilog", [](xag_network const& xag, std::string const& filename) {
         write_verilog(xag, filename);
     }, "Write a LogicNetwork to a Verilog file.");
+
+    // Algorithms
+    module.def("exorcism", []( dynamic_truth_table const& func ) {
+        std::vector<kitty::cube> esop;
+        exorcism( func );
+        return esop;
+    }, "Run the exorcism algorithm.");
 }
